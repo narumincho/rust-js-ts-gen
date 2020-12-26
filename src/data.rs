@@ -8,21 +8,21 @@ pub enum CodeType {
 /**
  * TypeScriptやJavaScriptのコードを表現する. TypeScriptでも出力できるように型情報をつける必要がある
  */
-struct Code {
+pub struct Code {
     /**
      * 外部に公開する定義
      */
-    export_definition_list: Vec<ExportDefinition>,
+    pub export_definition_list: Vec<ExportDefinition>,
     /**
      * 定義した後に実行するコード
      */
-    statementList: Vec<Statement>,
+    pub statement_list: Vec<Statement>,
 }
 
 /**
  * 外部に公開する定義
  */
-enum ExportDefinition {
+pub enum ExportDefinition {
     TypeAlias(TypeAlias),
     Function(Function),
     Variable(Variable),
@@ -32,14 +32,14 @@ enum ExportDefinition {
  *
  * TypeAlias. `export type T = {}`
  */
-struct TypeAlias {
+pub struct TypeAlias {
     name: identifer::Identifer,
     type_parameter_list: Vec<String>,
     document: String,
     r#type: Type,
 }
 
-struct Function {
+pub struct Function {
     /**
      * 外部に公開する関数の名前
      */
@@ -51,24 +51,24 @@ struct Function {
     /**
      * 型パラメーターのリスト
      */
-    typeParameterList: Vec<identifer::Identifer>,
+    type_parameter_list: Vec<identifer::Identifer>,
     /**
      * パラメーター
      */
-    parameterList: Vec<ParameterWithDocument>,
+    parameter_list: Vec<ParameterWithDocument>,
     /**
      * 戻り値の型
      */
-    returnType: Type,
+    return_type: Type,
     /**
      * 関数の本体
      */
-    statementList: Vec<Statement>,
+    statement_list: Vec<Statement>,
 }
 /**
  * ドキュメント付きの関数のパラメーター. パラメーター名, ドキュメント, 型
  */
-struct ParameterWithDocument {
+pub struct ParameterWithDocument {
     /**
      * パラメーター名
      */
@@ -86,7 +86,7 @@ struct ParameterWithDocument {
 /**
  * 関数のパラメーター. パラメーター名, ドキュメント
  */
-struct Parameter {
+pub struct Parameter {
     /**
      * パラメーター名
      */
@@ -97,7 +97,7 @@ struct Parameter {
     r#type: Type,
 }
 
-struct Variable {
+pub struct Variable {
     /**
      * 変数の名前
      */
@@ -119,7 +119,7 @@ struct Variable {
 /**
  * 単項演算子
  */
-enum UnaryOperator {
+pub enum UnaryOperator {
     Minus,
     BitwiseNot,
     LogicalNot,
@@ -128,7 +128,7 @@ enum UnaryOperator {
 /**
  * 2項演算子
  */
-enum BinaryOperator {
+pub enum BinaryOperator {
     Exponentiation,
     Multiplication,
     Division,
@@ -152,7 +152,7 @@ enum BinaryOperator {
 /**
  * 式
  */
-enum Expr {
+pub enum Expr {
     NumberLiteral(i32),
     StringLiteral(String),
     BooleanLiteral(bool),
@@ -173,7 +173,7 @@ enum Expr {
     TypeAssertion(Box<TypeAssertion>),
 }
 
-enum Statement {
+pub enum Statement {
     EvaluateExpr(Expr),
     Set(SetStatement),
     If(IfStatement),
@@ -193,7 +193,7 @@ enum Statement {
 /**
  * 型
  */
-enum Type {
+pub enum Type {
     Number,
     String,
     Boolean,
@@ -214,7 +214,7 @@ enum Type {
 /**
  * 単項演算子と適用される式
  */
-struct UnaryOperatorExpr {
+pub struct UnaryOperatorExpr {
     /**
      * 単項演算子
      */
@@ -228,7 +228,7 @@ struct UnaryOperatorExpr {
 /**
  * 2項演算子と左右の式
  */
-struct BinaryOperatorExpr {
+pub struct BinaryOperatorExpr {
     /**
      * 2項演算子
      */
@@ -245,7 +245,7 @@ struct BinaryOperatorExpr {
 /**
  * 条件演算子
  */
-struct ConditionalOperatorExpr {
+pub struct ConditionalOperatorExpr {
     /**
      * 条件の式
      */
@@ -253,16 +253,16 @@ struct ConditionalOperatorExpr {
     /**
      * 条件がtrueのときに評価される式
      */
-    thenExpr: Expr,
+    then_expr: Expr,
     /**
      * 条件がfalseのときに評価される式
      */
-    elseExpr: Expr,
+    else_expr: Expr,
 }
 /**
  * 配列リテラルの要素
  */
-struct ArrayItem {
+pub struct ArrayItem {
     /**
      * 式
      */
@@ -275,7 +275,7 @@ struct ArrayItem {
 /**
  * オブジェクトリテラルの要素
  */
-enum Member {
+pub enum Member {
     Spread(Expr),
     KeyValue(KeyValue),
 }
@@ -283,7 +283,7 @@ enum Member {
 /**
  * 文字列のkeyと式のvalue
  */
-struct KeyValue {
+pub struct KeyValue {
     /**
      * key
      */
@@ -293,10 +293,11 @@ struct KeyValue {
      */
     value: Expr,
 }
+
 /**
  * ラムダ式
  */
-struct LambdaExpr {
+pub struct LambdaExpr {
     /**
      * パラメーターのリスト
      */
@@ -318,7 +319,7 @@ struct LambdaExpr {
 /**
  * インポートした変数
  */
-struct ImportedVariable {
+pub struct ImportedVariable {
     /**
      * モジュール名, 使うときにはnamedインポートされ, そのモジュール識別子は自動的につけられる
      */
@@ -331,7 +332,7 @@ struct ImportedVariable {
 /**
  * プロパティアクセス
  */
-struct GetExpr {
+pub struct GetExpr {
     /**
      * 式
      */
@@ -345,7 +346,7 @@ struct GetExpr {
 /**
  * 式と呼ぶパラメーター
  */
-struct CallExpr {
+pub struct CallExpr {
     /**
      * 呼ばれる式
      */
@@ -359,7 +360,7 @@ struct CallExpr {
 /**
  * 型アサーション
  */
-struct TypeAssertion {
+pub struct TypeAssertion {
     /**
      * 型アサーションを受ける式
      */
@@ -373,7 +374,7 @@ struct TypeAssertion {
 /**
  * 代入文
  */
-struct SetStatement {
+pub struct SetStatement {
     /**
      * 対象となる式. 指定の仕方によってはJSのSyntaxErrorになる
      */
@@ -391,7 +392,7 @@ struct SetStatement {
 /**
  * if文
  */
-struct IfStatement {
+pub struct IfStatement {
     /**
      * 条件の式
      */
@@ -405,7 +406,7 @@ struct IfStatement {
 /**
  * ローカル変数定義
  */
-struct VariableDefinitionStatement {
+pub struct VariableDefinitionStatement {
     /**
      * 変数名
      */
@@ -427,7 +428,7 @@ struct VariableDefinitionStatement {
 /**
  * ローカル関数定義
  */
-struct FunctionDefinitionStatement {
+pub struct FunctionDefinitionStatement {
     /**
      * 変数名
      */
@@ -453,7 +454,7 @@ struct FunctionDefinitionStatement {
 /**
  * for文
  */
-struct ForStatement {
+pub struct ForStatement {
     /**
      * カウンタ変数名
      */
@@ -471,7 +472,7 @@ struct ForStatement {
 /**
  * forOf文
  */
-struct ForOfStatement {
+pub struct ForOfStatement {
     /**
      * 要素の変数名
      */
@@ -489,7 +490,7 @@ struct ForOfStatement {
 /**
  * switch文
  */
-struct SwitchStatement {
+pub struct SwitchStatement {
     /**
      * switch(a) {} の a
      */
@@ -503,7 +504,7 @@ struct SwitchStatement {
 /**
  * switch文のcase "text": { statementList } の部分
  */
-struct Pattern {
+pub struct Pattern {
     /**
      * case に使う文字列
      */
@@ -517,7 +518,7 @@ struct Pattern {
 /**
  * オブジェクトのメンバーの型
  */
-struct MemberType {
+pub struct MemberType {
     /**
      * プロパティ名
      */
@@ -539,7 +540,7 @@ struct MemberType {
 /**
  * 関数の型
  */
-struct FunctionType {
+pub struct FunctionType {
     /**
      * 型パラメーターのリスト
      */
@@ -557,7 +558,7 @@ struct FunctionType {
 /**
  * パラメーター付きの型
  */
-struct TypeWithTypeParameter {
+pub struct TypeWithTypeParameter {
     /**
      * パラメーターをつけられる型
      */
@@ -571,7 +572,7 @@ struct TypeWithTypeParameter {
 /**
  * 交差型
  */
-struct IntersectionType {
+pub struct IntersectionType {
     /**
      * 左に指定する型
      */
@@ -585,7 +586,7 @@ struct IntersectionType {
 /**
  * インポートされた型
  */
-struct ImportedType {
+pub struct ImportedType {
     /**
      * モジュール名. namedImportされるがその識別子は自動的に作成される
      */

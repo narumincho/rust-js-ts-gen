@@ -1,3 +1,4 @@
+#[derive(Debug, Eq, PartialEq)]
 pub struct Identifer {
     value: String,
 }
@@ -13,7 +14,8 @@ pub fn from_string(word: String) -> Identifer {
                 for char in chars {
                     result.push_str(&to_safe_string(char))
                 }
-                if reserved_by_language_word_set.contains(&result) {
+                let r: &str = &result;
+                if reserved_by_language_word_set.contains(&&r) {
                     result + "_"
                 } else {
                     result
@@ -56,7 +58,7 @@ fn escape_char(char: &char) -> String {
     format!("${codePoint:x}", codePoint = *char as u32)
 }
 
-const reserved_by_language_word_set: std::collections::HashSet<String> = vec![
+const reserved_by_language_word_set: [&str; 68] = [
     "await",
     "break",
     "case",
@@ -128,7 +130,23 @@ const reserved_by_language_word_set: std::collections::HashSet<String> = vec![
 ];
 
 #[test]
-fn escape_char_a() {
+fn test_escape_char() {
     assert_eq!(escape_char(&'a'), String::from("$61"));
     assert_eq!(escape_char(&'あ'), String::from("$3042"));
+}
+
+#[test]
+fn test_from_string() {
+    assert_eq!(
+        from_string(String::from("a")),
+        Identifer {
+            value: String::from("a")
+        }
+    );
+    assert_eq!(
+        from_string(String::from("this")),
+        Identifer {
+            value: String::from("this_")
+        }
+    );
 }
