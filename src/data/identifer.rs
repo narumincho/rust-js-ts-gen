@@ -13,7 +13,11 @@ pub fn from_string(word: String) -> Identifer {
                 for char in chars {
                     result.push_str(&to_safe_string(char))
                 }
-                result
+                if reserved_by_language_word_set.contains(&result) {
+                    result + "_"
+                } else {
+                    result
+                }
             }
         },
     }
@@ -51,6 +55,77 @@ fn to_safe_string<'a>(char: char) -> String {
 fn escape_char(char: &char) -> String {
     format!("${codePoint:x}", codePoint = *char as u32)
 }
+
+const reserved_by_language_word_set: std::collections::HashSet<String> = vec![
+    "await",
+    "break",
+    "case",
+    "catch",
+    "class",
+    "const",
+    "continue",
+    "debugger",
+    "default",
+    "delete",
+    "do",
+    "else",
+    "export",
+    "extends",
+    "finally",
+    "for",
+    "function",
+    "if",
+    "import",
+    "in",
+    "instanceof",
+    "new",
+    "return",
+    "super",
+    "switch",
+    "this",
+    "throw",
+    "try",
+    "typeof",
+    "var",
+    "void",
+    "while",
+    "with",
+    "yield",
+    "let",
+    "static",
+    "enum",
+    "implements",
+    "package",
+    "protected",
+    "interface",
+    "private",
+    "public",
+    "null",
+    "true",
+    "false",
+    "any",
+    "boolean",
+    "constructor",
+    "declare",
+    "get",
+    "module",
+    "require",
+    "number",
+    "set",
+    "string",
+    "symbol",
+    "type",
+    "from",
+    "of",
+    "as",
+    "unknown",
+    "Infinity",
+    "NaN",
+    "undefined",
+    "top",
+    "closed",
+    "self",
+];
 
 #[test]
 fn escape_char_a() {
