@@ -1,3 +1,5 @@
+pub mod identifer;
+
 pub enum CodeType {
     JavaScript,
     TypeScript,
@@ -31,7 +33,7 @@ enum ExportDefinition {
  * TypeAlias. `export type T = {}`
  */
 struct TypeAlias {
-    name: Identifer,
+    name: identifer::Identifer,
     type_parameter_list: Vec<String>,
     document: String,
     r#type: Type,
@@ -41,7 +43,7 @@ struct Function {
     /**
      * 外部に公開する関数の名前
      */
-    name: Identifer,
+    name: identifer::Identifer,
     /**
      * ドキュメント
      */
@@ -49,7 +51,7 @@ struct Function {
     /**
      * 型パラメーターのリスト
      */
-    typeParameterList: Vec<Identifer>,
+    typeParameterList: Vec<identifer::Identifer>,
     /**
      * パラメーター
      */
@@ -70,7 +72,7 @@ struct ParameterWithDocument {
     /**
      * パラメーター名
      */
-    name: Identifer,
+    name: identifer::Identifer,
     /**
      * ドキュメント
      */
@@ -88,7 +90,7 @@ struct Parameter {
     /**
      * パラメーター名
      */
-    name: Identifer,
+    name: identifer::Identifer,
     /**
      * パラメーターの型
      */
@@ -99,7 +101,7 @@ struct Variable {
     /**
      * 変数の名前
      */
-    name: Identifer,
+    name: identifer::Identifer,
     /**
      * ドキュメント
      */
@@ -162,8 +164,8 @@ enum Expr {
     ArrayLiteral(Box<Vec<ArrayItem>>),
     ObjectLiteral(Box<Vec<Member>>),
     Lambda(Box<LambdaExpr>),
-    Variable(Identifer),
-    GlobalObjects(Identifer),
+    Variable(identifer::Identifer),
+    GlobalObjects(identifer::Identifer),
     ImportedVariable(Box<ImportedVariable>),
     Get(Box<GetExpr>),
     Call(Box<CallExpr>),
@@ -205,8 +207,8 @@ enum Type {
     Union(Box<Vec<Type>>),
     Intersection(Box<IntersectionType>),
     ImportedType(ImportedType),
-    ScopeInFile(Identifer),
-    ScopeInGlobal(Identifer),
+    ScopeInFile(identifer::Identifer),
+    ScopeInGlobal(identifer::Identifer),
     StringLiteral(String),
 }
 /**
@@ -302,7 +304,7 @@ struct LambdaExpr {
     /**
      * 型パラメーターのリスト
      */
-    typeParameterList: Vec<Identifer>,
+    typeParameterList: Vec<identifer::Identifer>,
     /**
      * 戻り値の型
      */
@@ -324,7 +326,7 @@ struct ImportedVariable {
     /**
      * 変数名
      */
-    name: Identifer,
+    name: identifer::Identifer,
 }
 /**
  * プロパティアクセス
@@ -407,7 +409,7 @@ struct VariableDefinitionStatement {
     /**
      * 変数名
      */
-    name: Identifer,
+    name: identifer::Identifer,
     /**
      * 変数の型
      */
@@ -429,11 +431,11 @@ struct FunctionDefinitionStatement {
     /**
      * 変数名
      */
-    name: Identifer,
+    name: identifer::Identifer,
     /**
      * 型パラメーターのリスト
      */
-    typeParameterList: Vec<Identifer>,
+    typeParameterList: Vec<identifer::Identifer>,
     /**
      * パラメーターのリスト
      */
@@ -455,7 +457,7 @@ struct ForStatement {
     /**
      * カウンタ変数名
      */
-    counterVariableName: Identifer,
+    counterVariableName: identifer::Identifer,
     /**
      * ループの上限の式
      */
@@ -473,7 +475,7 @@ struct ForOfStatement {
     /**
      * 要素の変数名
      */
-    elementVariableName: Identifer,
+    elementVariableName: identifer::Identifer,
     /**
      * 繰り返す対象
      */
@@ -541,7 +543,7 @@ struct FunctionType {
     /**
      * 型パラメーターのリスト
      */
-    typeParameterList: Vec<Identifer>,
+    typeParameterList: Vec<identifer::Identifer>,
     /**
      * パラメーターの型. 意味のない引数名は適当に付く
      */
@@ -591,9 +593,5 @@ struct ImportedType {
     /**
      * 型の名前
      */
-    name: Identifer,
-}
-
-enum Identifer {
-    Identifer(String),
+    name: identifer::Identifer,
 }
