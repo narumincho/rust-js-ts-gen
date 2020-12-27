@@ -249,15 +249,15 @@ pub struct ConditionalOperatorExpr {
     /**
      * 条件の式
      */
-    condition: Expr,
+    pub condition: Expr,
     /**
      * 条件がtrueのときに評価される式
      */
-    then_expr: Expr,
+    pub then_expr: Expr,
     /**
      * 条件がfalseのときに評価される式
      */
-    else_expr: Expr,
+    pub else_expr: Expr,
 }
 /**
  * 配列リテラルの要素
@@ -350,11 +350,11 @@ pub struct CallExpr {
     /**
      * 呼ばれる式
      */
-    expr: Expr,
+    pub expr: Expr,
     /**
      * パラメーター
      */
-    parameterList: Vec<Expr>,
+    pub parameter_list: Vec<Expr>,
 }
 
 /**

@@ -219,17 +219,7 @@ fn lambda_body_to_string(
 ) -> String {
     match statement_list.first() {
         Some(data::Statement::Return(expr)) if statement_list.len() == 1 => {
-            expr_to_string_with_combine_strength(
-                &data::Expr::Lambda(Box::new(data::LambdaExpr {
-                    type_parameter_list: vec![],
-                    parameter_list: vec![],
-                    return_type: data::Type::Void,
-                    statement_list: vec![],
-                })),
-                expr,
-                indent,
-                code_type,
-            )
+            expr_to_string_with_combine_strength(LAMBDA_COMBINE_STRENGTH, expr, indent, code_type)
         }
         _ => statement_list_to_string(statement_list, indent, code_type),
     }
@@ -260,7 +250,7 @@ fn expr_to_string(expr: &data::Expr, indent: &Indent, code_type: &data::CodeType
         data::Expr::UnaryOperator(unary_operator_expr) => {
             unary_operator_to_string(&unary_operator_expr.operator)
                 + &expr_to_string_with_combine_strength(
-                    expr,
+                    UNARY_OPERATOR_COMBINE_STRENGTH,
                     &unary_operator_expr.expr,
                     indent,
                     code_type,
@@ -302,14 +292,18 @@ fn expr_to_string(expr: &data::Expr, indent: &Indent, code_type: &data::CodeType
         }
 
         data::Expr::Get(get_expr) => {
-            expr_to_string_with_combine_strength(expr, &get_expr.expr, indent, code_type)
-                + &index_access_to_string(&get_expr.propertyExpr, indent, code_type)
+            expr_to_string_with_combine_strength(
+                GET_COMBINE_STRENGTH,
+                &get_expr.expr,
+                indent,
+                code_type,
+            ) + &index_access_to_string(&get_expr.propertyExpr, indent, code_type)
         }
 
-        data::Expr::Call(call_expr) => call_expr_to_string(expr, call_expr, indent, code_type),
+        data::Expr::Call(call_expr) => call_expr_to_string(call_expr, indent, code_type),
 
         data::Expr::New(call_expr) => {
-            String::from("new ") + &call_expr_to_string(expr, call_expr, indent, code_type)
+            String::from("new ") + &call_expr_to_string(call_expr, indent, code_type)
         }
 
         data::Expr::TypeAssertion(type_assertion) => {
@@ -321,14 +315,14 @@ fn expr_to_string(expr: &data::Expr, indent: &Indent, code_type: &data::CodeType
 }
 
 fn expr_to_string_with_combine_strength(
-    expr: &data::Expr,
+    outside_combine_strength: u8,
     target: &data::Expr,
     indent: &Indent,
     code_type: &data::CodeType,
 ) -> String {
     enclose_in_parentheses_by_condition(
         &expr_to_string(target, indent, code_type),
-        expr_combine_strength(expr) > expr_combine_strength(target),
+        outside_combine_strength > expr_combine_strength(target),
     )
 }
 
@@ -352,17 +346,24 @@ fn expr_combine_strength(expr: &data::Expr) -> u8 {
         | data::Expr::Variable(_)
         | data::Expr::GlobalObjects(_)
         | data::Expr::ImportedVariable(_) => 23,
-        data::Expr::Lambda(_) => 22,
+        data::Expr::Lambda(_) => LAMBDA_COMBINE_STRENGTH,
         data::Expr::ObjectLiteral(_) => 21,
-        data::Expr::Get(_) | data::Expr::Call(_) | data::Expr::New(_) => 20,
-        data::Expr::UnaryOperator(_) => 17,
+        data::Expr::Get(_) => GET_COMBINE_STRENGTH,
+        data::Expr::Call(_) | data::Expr::New(_) => CALL_OR_NEW_COMBINE_STRENGTH,
+        data::Expr::UnaryOperator(_) => UNARY_OPERATOR_COMBINE_STRENGTH,
         data::Expr::BinaryOperator(binary_operator_expr) => {
             binary_operator_combine_strength(&binary_operator_expr.operator)
         }
-        data::Expr::ConditionalOperator(_) => 4,
+        data::Expr::ConditionalOperator(_) => CONDITIONAL_OPERATOR_COMBINE_STRENGTH,
         data::Expr::TypeAssertion(_) => 3,
     }
 }
+
+const LAMBDA_COMBINE_STRENGTH: u8 = 22;
+const UNARY_OPERATOR_COMBINE_STRENGTH: u8 = 17;
+const GET_COMBINE_STRENGTH: u8 = 20;
+const CALL_OR_NEW_COMBINE_STRENGTH: u8 = 20;
+const CONDITIONAL_OPERATOR_COMBINE_STRENGTH: u8 = 4;
 
 /// https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Operator_Precedence#Table
 fn binary_operator_combine_strength(binary_operator: &data::BinaryOperator) -> u8 {
@@ -662,24 +663,65 @@ fn conditional_operator_expr_to_string(
     indent: &Indent,
     code_type: &data::CodeType,
 ) -> String {
-    todo!()
+    expr_to_string_with_combine_strength(
+        CONDITIONAL_OPERATOR_COMBINE_STRENGTH,
+        &conditional_operator.condition,
+        indent,
+        code_type,
+    ) + "?"
+        + &expr_to_string_with_combine_strength(
+            CONDITIONAL_OPERATOR_COMBINE_STRENGTH,
+            &conditional_operator.then_expr,
+            indent,
+            code_type,
+        )
+        + ":"
+        + &expr_to_string_with_combine_strength(
+            CONDITIONAL_OPERATOR_COMBINE_STRENGTH,
+            &conditional_operator.else_expr,
+            indent,
+            code_type,
+        )
 }
 
 fn call_expr_to_string(
-    expr: &data::Expr,
     call_expr: &data::CallExpr,
     indent: &Indent,
     code_type: &data::CodeType,
 ) -> String {
-    todo!()
+    expr_to_string_with_combine_strength(
+        CALL_OR_NEW_COMBINE_STRENGTH,
+        &call_expr.expr,
+        indent,
+        code_type,
+    ) + "("
+        + &call_expr
+            .parameter_list
+            .iter()
+            .map(|parameter| expr_to_string(parameter, indent, code_type))
+            .collect::<Vec<String>>()
+            .join(", ")
+        + ")"
 }
 
+///
+/// ```ts
+/// list[0]
+/// data.name
+///  ```
+/// の部分indexのExprがstringLiteralで識別子に使える文字なら`.name`のようになる
+///
 fn index_access_to_string(
-    expr: &data::Expr,
+    index_expr: &data::Expr,
     indent: &Indent,
     code_type: &data::CodeType,
 ) -> String {
-    todo!()
+    match index_expr {
+        data::Expr::StringLiteral(string) if data::identifer::is_safe_property_name(string) => {
+            String::from(".") + string
+        }
+        _ => String::from("[") + &expr_to_string(index_expr, indent, code_type) + "]",
+    }
 }
 
 fn function_definition_statement_to_string(
@@ -687,7 +729,22 @@ fn function_definition_statement_to_string(
     indent: &Indent,
     code_type: &data::CodeType,
 ) -> String {
-    todo!()
+    String::from("const ")
+        + &function_definition.name.get()
+        + " = "
+        + &type_parameter_list_to_string(&function_definition.type_parameter_list)
+        + "("
+        + &function_definition
+            .parameter_list
+            .iter()
+            .map(|parameter| parameter.name.get() + &type_annotation(&parameter.r#type, code_type))
+            .collect::<Vec<String>>()
+            .join(", ")
+        + ")"
+        + &type_annotation(&function_definition.return_type, code_type)
+        + " => "
+        + &lambda_body_to_string(&function_definition.statement_list, indent, code_type)
+        + ";"
 }
 
 fn switch_to_string(
