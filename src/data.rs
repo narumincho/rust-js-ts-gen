@@ -232,15 +232,15 @@ pub struct BinaryOperatorExpr {
     /**
      * 2項演算子
      */
-    operator: BinaryOperator,
+    pub operator: BinaryOperator,
     /**
      * 左の式
      */
-    left: Expr,
+    pub left: Expr,
     /**
      * 右の式
      */
-    right: Expr,
+    pub right: Expr,
 }
 /**
  * 条件演算子

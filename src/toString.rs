@@ -264,17 +264,17 @@ fn expr_to_string(expr: &data::Expr, indent: &Indent, code_type: &data::CodeType
             object_literal_to_string(member_list, indent, code_type)
         }
 
-        data::Expr::UnaryOperator(unary_operatorExpr) => {
-            unary_operator_to_string(&unary_operatorExpr.operator)
+        data::Expr::UnaryOperator(unary_operator_expr) => {
+            unary_operator_to_string(&unary_operator_expr.operator)
                 + &expr_to_string_with_combine_strength(
                     expr,
-                    &unary_operatorExpr.expr,
+                    &unary_operator_expr.expr,
                     indent,
                     code_type,
                 )
         }
-        data::Expr::BinaryOperator(binaryOperatorExpr) => {
-            binary_operator_expr_to_string(binaryOperatorExpr, indent, code_type)
+        data::Expr::BinaryOperator(binary_operator_expr) => {
+            binary_operator_expr_to_string(binary_operator_expr, indent, code_type)
         }
 
         data::Expr::ConditionalOperator(conditional_operator_expr) => {
@@ -334,7 +334,57 @@ fn expr_to_string_with_combine_strength(
     indent: &Indent,
     code_type: &data::CodeType,
 ) -> String {
-    todo!()
+    let text = expr_to_string(target, indent, code_type);
+    if expr_combine_strength(expr) > expr_combine_strength(target) {
+        String::from("(") + &text + ")"
+    } else {
+        text
+    }
+}
+
+/// https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Operator_Precedence#Table
+fn expr_combine_strength(expr: &data::Expr) -> u8 {
+    match expr {
+        data::Expr::NumberLiteral(_)
+        | data::Expr::StringLiteral(_)
+        | data::Expr::BooleanLiteral(_)
+        | data::Expr::NullLiteral
+        | data::Expr::UndefinedLiteral
+        | data::Expr::ArrayLiteral(_)
+        | data::Expr::Variable(_)
+        | data::Expr::GlobalObjects(_)
+        | data::Expr::ImportedVariable(_) => 23,
+        data::Expr::Lambda(_) => 22,
+        data::Expr::ObjectLiteral(_) => 21,
+        data::Expr::Get(_) | data::Expr::Call(_) | data::Expr::New(_) => 20,
+        data::Expr::UnaryOperator(_) => 17,
+        data::Expr::BinaryOperator(binary_operator_expr) => {
+            binary_operator_combine_strength(&binary_operator_expr.operator)
+        }
+        data::Expr::ConditionalOperator(_) => 4,
+        data::Expr::TypeAssertion(_) => 3,
+    }
+}
+
+/// https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Operator_Precedence#Table
+fn binary_operator_combine_strength(binary_operator: &data::BinaryOperator) -> u8 {
+    match binary_operator {
+        data::BinaryOperator::Exponentiation => 16,
+        data::BinaryOperator::Multiplication
+        | data::BinaryOperator::Division
+        | data::BinaryOperator::Remainder => 15,
+        data::BinaryOperator::Addition | data::BinaryOperator::Subtraction => 14,
+        data::BinaryOperator::LeftShift
+        | data::BinaryOperator::SignedRightShift
+        | data::BinaryOperator::UnsignedRightShift => 13,
+        data::BinaryOperator::LessThan | data::BinaryOperator::LessThanOrEqual => 12,
+        data::BinaryOperator::Equal | data::BinaryOperator::NotEqual => 11,
+        data::BinaryOperator::BitwiseAnd => 10,
+        data::BinaryOperator::BitwiseXOr => 9,
+        data::BinaryOperator::BitwiseOr => 8,
+        data::BinaryOperator::LogicalAnd => 6,
+        data::BinaryOperator::LogicalOr => 5,
+    }
 }
 
 fn statement_list_to_string(
