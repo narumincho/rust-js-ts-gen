@@ -3,6 +3,11 @@ pub struct Identifer {
     value: String,
 }
 
+/// Identifer の中身の文字を取得する
+pub fn get(identifer: &Identifer) -> String {
+    identifer.value
+}
+
 pub fn from_string(word: String) -> Identifer {
     let mut chars = word.chars();
     let first_char = chars.next();
@@ -23,6 +28,22 @@ pub fn from_string(word: String) -> Identifer {
             }
         },
     }
+}
+
+#[test]
+fn test_from_string() {
+    assert_eq!(
+        from_string(String::from("a")),
+        Identifer {
+            value: String::from("a")
+        }
+    );
+    assert_eq!(
+        from_string(String::from("this")),
+        Identifer {
+            value: String::from("this_")
+        }
+    );
 }
 
 fn to_safe_first_char(char: char) -> String {
@@ -46,7 +67,7 @@ const safeCharSet: [char; 64] = [
     '3', '4', '5', '6', '7', '8', '9',
 ];
 
-fn to_safe_string<'a>(char: char) -> String {
+fn to_safe_string(char: char) -> String {
     if safeCharSet.contains(&char) {
         String::from(char)
     } else {
@@ -56,6 +77,12 @@ fn to_safe_string<'a>(char: char) -> String {
 
 fn escape_char(char: &char) -> String {
     format!("${codePoint:x}", codePoint = *char as u32)
+}
+
+#[test]
+fn test_escape_char() {
+    assert_eq!(escape_char(&'a'), String::from("$61"));
+    assert_eq!(escape_char(&'あ'), String::from("$3042"));
 }
 
 const reserved_by_language_word_set: [&str; 68] = [
@@ -128,25 +155,3 @@ const reserved_by_language_word_set: [&str; 68] = [
     "closed",
     "self",
 ];
-
-#[test]
-fn test_escape_char() {
-    assert_eq!(escape_char(&'a'), String::from("$61"));
-    assert_eq!(escape_char(&'あ'), String::from("$3042"));
-}
-
-#[test]
-fn test_from_string() {
-    assert_eq!(
-        from_string(String::from("a")),
-        Identifer {
-            value: String::from("a")
-        }
-    );
-    assert_eq!(
-        from_string(String::from("this")),
-        Identifer {
-            value: String::from("this_")
-        }
-    );
-}

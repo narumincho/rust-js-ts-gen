@@ -1,9 +1,5 @@
-mod data;
-mod toString;
-
-fn main() {
-    println!("Hello, world!");
-}
+pub mod data;
+pub mod toString;
 
 #[test]
 fn test() {

@@ -33,37 +33,37 @@ pub enum ExportDefinition {
  * TypeAlias. `export type T = {}`
  */
 pub struct TypeAlias {
-    name: identifer::Identifer,
-    type_parameter_list: Vec<String>,
-    document: String,
-    r#type: Type,
+    pub name: identifer::Identifer,
+    pub type_parameter_list: Vec<identifer::Identifer>,
+    pub document: String,
+    pub r#type: Type,
 }
 
 pub struct Function {
     /**
      * 外部に公開する関数の名前
      */
-    name: identifer::Identifer,
+    pub name: identifer::Identifer,
     /**
      * ドキュメント
      */
-    document: String,
+    pub document: String,
     /**
      * 型パラメーターのリスト
      */
-    type_parameter_list: Vec<identifer::Identifer>,
+    pub type_parameter_list: Vec<identifer::Identifer>,
     /**
      * パラメーター
      */
-    parameter_list: Vec<ParameterWithDocument>,
+    pub parameter_list: Vec<ParameterWithDocument>,
     /**
      * 戻り値の型
      */
-    return_type: Type,
+    pub return_type: Type,
     /**
      * 関数の本体
      */
-    statement_list: Vec<Statement>,
+    pub statement_list: Vec<Statement>,
 }
 /**
  * ドキュメント付きの関数のパラメーター. パラメーター名, ドキュメント, 型
@@ -72,15 +72,15 @@ pub struct ParameterWithDocument {
     /**
      * パラメーター名
      */
-    name: identifer::Identifer,
+    pub name: identifer::Identifer,
     /**
      * ドキュメント
      */
-    document: String,
+    pub document: String,
     /**
      * パラメーターの型
      */
-    r#type: Type,
+    pub r#type: Type,
 }
 
 /**
@@ -101,19 +101,19 @@ pub struct Variable {
     /**
      * 変数の名前
      */
-    name: identifer::Identifer,
+    pub name: identifer::Identifer,
     /**
      * ドキュメント
      */
-    document: String,
+    pub document: String,
     /**
      * 変数の型
      */
-    r#type: Type,
+    pub r#type: Type,
     /**
      * 変数の式
      */
-    expr: Expr,
+    pub expr: Expr,
 }
 
 /**
