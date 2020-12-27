@@ -8,16 +8,16 @@ pub fn get(identifer: &Identifer) -> String {
     identifer.value.clone()
 }
 
-pub fn from_string(word: String) -> Identifer {
+pub fn from_string(word: &str) -> Identifer {
     let mut chars = word.chars();
     let first_char = chars.next();
     Identifer {
         value: match first_char {
             None => "$00".to_string(),
             Some(first_char) => {
-                let mut result = to_safe_first_char(first_char);
+                let mut result = to_safe_first_char(&first_char);
                 for char in chars {
-                    result.push_str(&to_safe_string(char))
+                    result.push_str(&to_safe_string(&char))
                 }
                 let r: &str = &result;
                 if reserved_by_language_word_set.contains(&&r) {
@@ -33,20 +33,20 @@ pub fn from_string(word: String) -> Identifer {
 #[test]
 fn test_from_string() {
     assert_eq!(
-        from_string(String::from("a")),
+        from_string("a"),
         Identifer {
             value: String::from("a")
         }
     );
     assert_eq!(
-        from_string(String::from("this")),
+        from_string("this"),
         Identifer {
             value: String::from("this_")
         }
     );
 }
 
-fn to_safe_first_char(char: char) -> String {
+fn to_safe_first_char(char: &char) -> String {
     if firstSafeCharSet.contains(&char) {
         char.to_string()
     } else {
@@ -67,9 +67,9 @@ const safeCharSet: [char; 64] = [
     '3', '4', '5', '6', '7', '8', '9',
 ];
 
-fn to_safe_string(char: char) -> String {
+fn to_safe_string(char: &char) -> String {
     if safeCharSet.contains(&char) {
-        String::from(char)
+        String::from(*char)
     } else {
         escape_char(&char)
     }
@@ -155,3 +155,25 @@ const reserved_by_language_word_set: [&str; 68] = [
     "closed",
     "self",
 ];
+
+///
+/// ```ts
+/// ({ await: 32 }.await)
+/// ({ "": "empty"}[""])
+/// ```
+/// プロパティ名として直接コードで指定できるかどうか
+/// `isIdentifer`とは予約語を指定できるかの面で違う
+///
+pub fn is_safe_property_name(word: &str) -> bool {
+    let mut chars = word.chars();
+    match chars.next() {
+        None => false,
+        Some(first_char) => {
+            if !firstSafeCharSet.contains(&first_char) {
+                false
+            } else {
+                chars.all(|char| safeCharSet.contains(&char))
+            }
+        }
+    }
+}

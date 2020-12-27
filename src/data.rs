@@ -90,11 +90,11 @@ pub struct Parameter {
     /**
      * パラメーター名
      */
-    name: identifer::Identifer,
+    pub name: identifer::Identifer,
     /**
      * パラメーターの型
      */
-    r#type: Type,
+    pub r#type: Type,
 }
 
 pub struct Variable {
@@ -166,7 +166,7 @@ pub enum Expr {
     Lambda(Box<LambdaExpr>),
     Variable(identifer::Identifer),
     GlobalObjects(identifer::Identifer),
-    ImportedVariable(Box<ImportedVariable>),
+    ImportedVariable(ImportedVariable),
     Get(Box<GetExpr>),
     Call(Box<CallExpr>),
     New(Box<CallExpr>),
@@ -218,11 +218,11 @@ pub struct UnaryOperatorExpr {
     /**
      * 単項演算子
      */
-    operator: UnaryOperator,
+    pub operator: UnaryOperator,
     /**
      * 適用される式
      */
-    expr: Expr,
+    pub expr: Expr,
 }
 
 /**
@@ -266,11 +266,11 @@ pub struct ArrayItem {
     /**
      * 式
      */
-    expr: Expr,
+    pub expr: Expr,
     /**
      * スプレッド ...a のようにするか
      */
-    spread: bool,
+    pub spread: bool,
 }
 /**
  * オブジェクトリテラルの要素
@@ -287,11 +287,11 @@ pub struct KeyValue {
     /**
      * key
      */
-    key: String,
+    pub key: String,
     /**
      * value
      */
-    value: Expr,
+    pub value: Expr,
 }
 
 /**
@@ -323,11 +323,11 @@ pub struct ImportedVariable {
     /**
      * モジュール名, 使うときにはnamedインポートされ, そのモジュール識別子は自動的につけられる
      */
-    moduleName: String,
+    pub module_name: String,
     /**
      * 変数名
      */
-    name: identifer::Identifer,
+    pub name: identifer::Identifer,
 }
 /**
  * プロパティアクセス
@@ -336,11 +336,11 @@ pub struct GetExpr {
     /**
      * 式
      */
-    expr: Expr,
+    pub expr: Expr,
     /**
      * プロパティの式
      */
-    propertyExpr: Expr,
+    pub propertyExpr: Expr,
 }
 
 /**
@@ -364,11 +364,11 @@ pub struct TypeAssertion {
     /**
      * 型アサーションを受ける式
      */
-    expr: Expr,
+    pub expr: Expr,
     /**
      * 型
      */
-    r#type: Type,
+    pub r#type: Type,
 }
 
 /**
