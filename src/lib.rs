@@ -2,7 +2,7 @@ pub mod data;
 pub mod toString;
 
 #[test]
-fn test() {
+fn test_empty() {
     assert_eq!(
         toString::to_string(
             data::Code {

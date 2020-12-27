@@ -1,37 +1,35 @@
 pub mod identifer;
 
+/// コードの種類
 pub enum CodeType {
+    /// JavaScript. ブラウザで動作するプログラミング言語
     JavaScript,
+    /// TypeScript. JavaScript に 型をつけた言語
     TypeScript,
 }
 
-/**
- * TypeScriptやJavaScriptのコードを表現する. TypeScriptでも出力できるように型情報をつける必要がある
- */
+/// TypeScriptやJavaScriptのコードを表現する. TypeScriptでも出力できるように型情報をつける必要がある
 pub struct Code {
-    /**
-     * 外部に公開する定義
-     */
+    /// 外部に公開する定義
     pub export_definition_list: Vec<ExportDefinition>,
-    /**
-     * 定義した後に実行するコード
-     */
+    /// 定義した後に実行するコード
     pub statement_list: Vec<Statement>,
 }
 
-/**
- * 外部に公開する定義
- */
+/// 外部に公開する定義
 pub enum ExportDefinition {
+    /// 型定義. JavaScript では出力されない
     TypeAlias(TypeAlias),
+    /// 関数
     Function(Function),
+    /// 変数
     Variable(Variable),
 }
 
-/**
- *
- * TypeAlias. `export type T = {}`
- */
+/// 型に別名を付けて定義する.
+/// ```ts
+/// export type T = {}
+/// ```
 pub struct TypeAlias {
     pub name: identifer::Identifer,
     pub type_parameter_list: Vec<identifer::Identifer>,
@@ -97,6 +95,7 @@ pub struct Parameter {
     pub r#type: Type,
 }
 
+/// 変数
 pub struct Variable {
     /**
      * 変数の名前
@@ -340,7 +339,7 @@ pub struct GetExpr {
     /**
      * プロパティの式
      */
-    pub propertyExpr: Expr,
+    pub property_expr: Expr,
 }
 
 /**

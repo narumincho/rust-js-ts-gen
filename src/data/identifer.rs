@@ -28,7 +28,7 @@ pub fn from_string(word: &str) -> Identifer {
                     result.push_str(&to_safe_string(&char))
                 }
                 let r: &str = &result;
-                if reserved_by_language_word_set.contains(&&r) {
+                if RESERVED_BY_LANGUAGE_WORD_SET.contains(&&r) {
                     result + "_"
                 } else {
                     result
@@ -93,7 +93,7 @@ fn test_escape_char() {
     assert_eq!(escape_char(&'あ'), String::from("$3042"));
 }
 
-const reserved_by_language_word_set: [&str; 68] = [
+const RESERVED_BY_LANGUAGE_WORD_SET: [&str; 68] = [
     "await",
     "break",
     "case",

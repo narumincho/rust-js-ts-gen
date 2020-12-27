@@ -1,16 +1,16 @@
 use crate::data;
 
-#[derive(Copy, Clone)]
-pub struct Indent {
+/// 入れ子の回数
+struct Indent {
     value: u16,
 }
 
 impl Indent {
-    fn from(value: u16) -> Self {
-        Indent { value }
+    fn zero() -> Self {
+        Indent { value: 0 }
     }
 
-    fn add_one(self) -> Self {
+    fn add_one(&self) -> Self {
         Indent {
             value: self.value + 1,
         }
@@ -78,7 +78,7 @@ fn export_function_to_string(function: &data::Function, code_type: &data::CodeTy
         + "): "
         + &type_to_string(&function.return_type)
         + " => "
-        + &lambda_body_to_string(&function.statement_list, &Indent::from(0), code_type)
+        + &lambda_body_to_string(&function.statement_list, &Indent::zero(), code_type)
         + ";\n\n"
 }
 
@@ -88,7 +88,7 @@ fn export_variable_to_string(variable: &data::Variable, code_type: &data::CodeTy
         + &variable.name.get()
         + &type_annotation(&variable.r#type, code_type)
         + " = "
-        + &expr_to_string(&variable.expr, &Indent::from(0), code_type)
+        + &expr_to_string(&variable.expr, &Indent::zero(), code_type)
         + ";\n\n"
 }
 
@@ -297,7 +297,7 @@ fn expr_to_string(expr: &data::Expr, indent: &Indent, code_type: &data::CodeType
                 &get_expr.expr,
                 indent,
                 code_type,
-            ) + &index_access_to_string(&get_expr.propertyExpr, indent, code_type)
+            ) + &index_access_to_string(&get_expr.property_expr, indent, code_type)
         }
 
         data::Expr::Call(call_expr) => call_expr_to_string(call_expr, indent, code_type),
@@ -572,8 +572,20 @@ fn string_literal_value_to_string(string: &str) -> String {
 #[test]
 fn test_escape_in_string_literal() {
     assert_eq!(
-        string_literal_value_to_string("\\ a \n \"\""),
-        String::from("\"\\\\ a \\n \\\"\\\"\"")
+        string_literal_value_to_string(
+            r#"\\ a
+\"""#
+        ),
+        String::from(r#""\\\\ a\n\\\"\"""#)
+    );
+    assert_eq!(
+        string_literal_value_to_string(
+            r#"
+        改行
+        "ダブルクオーテーション"
+"#
+        ),
+        String::from(r#""\n        改行\n        \"ダブルクオーテーション\"\n""#)
     )
 }
 
