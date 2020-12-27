@@ -16,11 +16,6 @@ impl std::fmt::Display for Identifer {
     }
 }
 
-#[deprecated]
-pub fn get(identifer: &Identifer) -> String {
-    identifer.value.clone()
-}
-
 pub fn from_string(word: &str) -> Identifer {
     let mut chars = word.chars();
     let first_char = chars.next();

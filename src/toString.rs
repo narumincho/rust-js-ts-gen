@@ -36,9 +36,10 @@ fn export_definition_to_string(
     code_type: &data::CodeType,
 ) -> String {
     match export_definition {
-        data::ExportDefinition::TypeAlias(type_alias) => {
-            type_alias_to_string(type_alias, code_type)
-        }
+        data::ExportDefinition::TypeAlias(type_alias) => match &code_type {
+            data::CodeType::JavaScript => String::new(),
+            data::CodeType::TypeScript => type_alias_to_string(type_alias),
+        },
         data::ExportDefinition::Function(function) => {
             export_function_to_string(function, code_type)
         }
@@ -48,7 +49,7 @@ fn export_definition_to_string(
     }
 }
 
-fn type_alias_to_string(type_alias: &data::TypeAlias, code_type: &data::CodeType) -> String {
+fn type_alias_to_string(type_alias: &data::TypeAlias) -> String {
     document_to_string(&type_alias.document)
         + "export type "
         + &type_alias.name.get()
@@ -77,7 +78,7 @@ fn export_function_to_string(function: &data::Function, code_type: &data::CodeTy
         + "): "
         + &type_to_string(&function.return_type)
         + " => "
-        + &lambdaBody_to_string(&function.statement_list, &Indent::from(0), code_type)
+        + &lambda_body_to_string(&function.statement_list, &Indent::from(0), code_type)
         + ";\n\n"
 }
 
@@ -211,7 +212,7 @@ fn type_to_string(r#type: &data::Type) -> String {
     }
 }
 
-fn lambdaBody_to_string(
+fn lambda_body_to_string(
     statement_list: &Vec<data::Statement>,
     indent: &Indent,
     code_type: &data::CodeType,
@@ -287,17 +288,17 @@ fn expr_to_string(expr: &data::Expr, indent: &Indent, code_type: &data::CodeType
                 + ")"
                 + &type_annotation(&lambda.return_type, code_type)
                 + " => "
-                + &lambdaBody_to_string(&lambda.statement_list, indent, code_type)
+                + &lambda_body_to_string(&lambda.statement_list, indent, code_type)
         }
 
-        data::Expr::Variable(identifer) => data::identifer::get(identifer),
+        data::Expr::Variable(identifer) => identifer.get(),
 
-        data::Expr::GlobalObjects(identifer) => data::identifer::get(identifer),
+        data::Expr::GlobalObjects(identifer) => identifer.get(),
         data::Expr::ImportedVariable(imported_variable) => {
             String::from("$$$")
                 + &imported_variable.module_name
                 + "."
-                + &data::identifer::get(&imported_variable.name)
+                + &imported_variable.name.get()
         }
 
         data::Expr::Get(get_expr) => {
@@ -325,11 +326,17 @@ fn expr_to_string_with_combine_strength(
     indent: &Indent,
     code_type: &data::CodeType,
 ) -> String {
-    let text = expr_to_string(target, indent, code_type);
-    if expr_combine_strength(expr) > expr_combine_strength(target) {
-        String::from("(") + &text + ")"
+    enclose_in_parentheses_by_condition(
+        &expr_to_string(target, indent, code_type),
+        expr_combine_strength(expr) > expr_combine_strength(target),
+    )
+}
+
+fn enclose_in_parentheses_by_condition(str: &str, condition: bool) -> String {
+    if condition {
+        String::from("(") + str + ")"
     } else {
-        text
+        String::from(str)
     }
 }
 
@@ -537,8 +544,19 @@ fn type_object_to_string(member_list: &Vec<data::MemberType>) -> String {
         + " }"
 }
 
-fn type_function_to_string(function: &data::FunctionType) -> String {
-    todo!()
+/// 関数の引数と戻り値の型を文字列にする
+fn type_function_to_string(function_type: &data::FunctionType) -> String {
+    type_parameter_list_to_string(&function_type.type_parameter_list)
+        + "("
+        + &function_type
+            .parameter_list
+            .iter()
+            .enumerate()
+            .map(|(index, parameter)| format!("${}: {}", index, type_to_string(parameter)))
+            .collect::<Vec<String>>()
+            .join(", ")
+        + ") => "
+        + &type_to_string(&function_type.return_type)
 }
 
 fn string_literal_value_to_string(string: &str) -> String {
@@ -605,7 +623,11 @@ fn object_literal_to_string(
 }
 
 fn unary_operator_to_string(unary_operator: &data::UnaryOperator) -> String {
-    todo!()
+    String::from(match unary_operator {
+        data::UnaryOperator::Minus => "-",
+        data::UnaryOperator::BitwiseNot => "~",
+        data::UnaryOperator::LogicalNot => "!",
+    })
 }
 
 fn binary_operator_expr_to_string(
@@ -613,7 +635,26 @@ fn binary_operator_expr_to_string(
     indent: &Indent,
     code_type: &data::CodeType,
 ) -> String {
-    todo!()
+    let operator_expr_combine_strength =
+        binary_operator_combine_strength(&binary_operator_expr.operator);
+    let left_expr_combine_strength = expr_combine_strength(&binary_operator_expr.left);
+    let right_expr_combine_strength = expr_combine_strength(&binary_operator_expr.right);
+    let associativity = binary_operator_associativity(&binary_operator_expr.operator);
+
+    (enclose_in_parentheses_by_condition(
+        &expr_to_string(&binary_operator_expr.left, indent, code_type),
+        operator_expr_combine_strength > left_expr_combine_strength
+            || (operator_expr_combine_strength == left_expr_combine_strength
+                && associativity == Associativity::RightToLeft),
+    )) + " "
+        + &binary_operator_to_string(&binary_operator_expr.operator)
+        + " "
+        + &(enclose_in_parentheses_by_condition(
+            &expr_to_string(&binary_operator_expr.right, indent, code_type),
+            operator_expr_combine_strength > right_expr_combine_strength
+                || (operator_expr_combine_strength == right_expr_combine_strength
+                    && associativity == Associativity::LeftToRight),
+        ))
 }
 
 fn conditional_operator_expr_to_string(
@@ -680,5 +721,34 @@ fn property_name_to_string(property_name: &str) -> String {
         String::from(property_name)
     } else {
         string_literal_value_to_string(property_name)
+    }
+}
+
+#[derive(Eq, PartialEq)]
+pub enum Associativity {
+    LeftToRight,
+    RightToLeft,
+}
+
+fn binary_operator_associativity(binary_operator: &data::BinaryOperator) -> Associativity {
+    match binary_operator {
+        data::BinaryOperator::Exponentiation => Associativity::RightToLeft,
+        data::BinaryOperator::Multiplication
+        | data::BinaryOperator::Division
+        | data::BinaryOperator::Remainder
+        | data::BinaryOperator::Addition
+        | data::BinaryOperator::Subtraction
+        | data::BinaryOperator::LeftShift
+        | data::BinaryOperator::SignedRightShift
+        | data::BinaryOperator::UnsignedRightShift
+        | data::BinaryOperator::LessThan
+        | data::BinaryOperator::LessThanOrEqual
+        | data::BinaryOperator::Equal
+        | data::BinaryOperator::NotEqual
+        | data::BinaryOperator::BitwiseAnd
+        | data::BinaryOperator::BitwiseXOr
+        | data::BinaryOperator::BitwiseOr
+        | data::BinaryOperator::LogicalAnd
+        | data::BinaryOperator::LogicalOr => Associativity::LeftToRight,
     }
 }

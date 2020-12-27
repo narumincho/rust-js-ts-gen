@@ -544,15 +544,15 @@ pub struct FunctionType {
     /**
      * 型パラメーターのリスト
      */
-    type_parameter_list: Vec<identifer::Identifer>,
+    pub type_parameter_list: Vec<identifer::Identifer>,
     /**
      * パラメーターの型. 意味のない引数名は適当に付く
      */
-    parameter_list: Vec<Type>,
+    pub parameter_list: Vec<Type>,
     /**
      * 戻り値の型
      */
-    r#return: Type,
+    pub return_type: Type,
 }
 
 /**
