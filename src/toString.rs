@@ -10,7 +10,7 @@ impl Indent {
         Indent { value }
     }
 
-    fn addOne(self) -> Self {
+    fn add_one(self) -> Self {
         Indent {
             value: self.value + 1,
         }
@@ -51,7 +51,7 @@ fn export_definition_to_string(
 fn type_alias_to_string(type_alias: &data::TypeAlias, code_type: &data::CodeType) -> String {
     document_to_string(&type_alias.document)
         + "export type "
-        + &data::identifer::get(&type_alias.name)
+        + &type_alias.name.get()
         + &type_parameter_list_to_string(&type_alias.type_parameter_list)
         + " = "
         + &type_to_string(&type_alias.r#type)
@@ -64,16 +64,14 @@ fn export_function_to_string(function: &data::Function, code_type: &data::CodeTy
             + &function.document
             + &parameter_list_to_document(&function.parameter_list)),
     ) + "export const "
-        + &data::identifer::get(&function.name)
+        + &function.name.get()
         + " = "
         + &type_parameter_list_to_string(&function.type_parameter_list)
         + "("
         + &function
             .parameter_list
             .iter()
-            .map(|parameter| {
-                data::identifer::get(&parameter.name) + ": " + &type_to_string(&parameter.r#type)
-            })
+            .map(|parameter| parameter.name.get() + ": " + &type_to_string(&parameter.r#type))
             .collect::<Vec<String>>()
             .join(", ")
         + "): "
@@ -86,7 +84,7 @@ fn export_function_to_string(function: &data::Function, code_type: &data::CodeTy
 fn export_variable_to_string(variable: &data::Variable, code_type: &data::CodeType) -> String {
     document_to_string(&variable.document)
         + "export const "
-        + &data::identifer::get(&variable.name)
+        + &variable.name.get()
         + &type_annotation(&variable.r#type, code_type)
         + " = "
         + &expr_to_string(&variable.expr, &Indent::from(0), code_type)
@@ -125,10 +123,7 @@ fn parameter_list_to_document(parameter_list: &Vec<data::ParameterWithDocument>)
                     if parameter.document.is_empty() {
                         String::new()
                     } else {
-                        String::from("@param ")
-                            + &data::identifer::get(&parameter.name)
-                            + " "
-                            + &parameter.document
+                        String::from("@param ") + &parameter.name.get() + " " + &parameter.document
                     }
                 })
                 .collect::<Vec<String>>()
@@ -150,7 +145,7 @@ fn type_parameter_list_to_string(type_parameter_list: &Vec<data::identifer::Iden
         String::from("<")
             + &type_parameter_list
                 .iter()
-                .map(|type_parameter| data::identifer::get(type_parameter) + " extends unknown")
+                .map(|type_parameter| type_parameter.get() + " extends unknown")
                 .collect::<Vec<String>>()
                 .join(", ")
             + ">"
@@ -198,21 +193,18 @@ fn type_to_string(r#type: &data::Type) -> String {
                         + &type_with_parameter
                             .type_parameter_list
                             .iter()
-                            .map(|typeParameter| type_to_string(typeParameter))
+                            .map(type_to_string)
                             .collect::<Vec<String>>()
                             .join(", ")
                         + ">"
                 })
         }
 
-        data::Type::ScopeInFile(identifer) => data::identifer::get(identifer),
+        data::Type::ScopeInFile(identifer) => identifer.get(),
 
-        data::Type::ScopeInGlobal(identifer) => data::identifer::get(identifer),
+        data::Type::ScopeInGlobal(identifer) => identifer.get(),
         data::Type::ImportedType(imported_type) => {
-            String::from("$$$")
-                + &imported_type.module_name
-                + "."
-                + &data::identifer::get(&imported_type.name)
+            String::from("$$$") + &imported_type.module_name + "." + &imported_type.name.get()
         }
 
         data::Type::StringLiteral(string) => string_literal_value_to_string(string),
@@ -288,8 +280,7 @@ fn expr_to_string(expr: &data::Expr, indent: &Indent, code_type: &data::CodeType
                     .parameter_list
                     .iter()
                     .map(|parameter| {
-                        data::identifer::get(&parameter.name)
-                            + &type_annotation(&parameter.r#type, code_type)
+                        parameter.name.get() + &type_annotation(&parameter.r#type, code_type)
                     })
                     .collect::<Vec<String>>()
                     .join(", ")
@@ -395,7 +386,7 @@ fn statement_list_to_string(
     String::from("{\n")
         + &statement_list
             .iter()
-            .map(|statement| statement_to_string(statement, &indent.addOne(), code_type))
+            .map(|statement| statement_to_string(statement, &indent.add_one(), code_type))
             .collect::<Vec<String>>()
             .join("\n")
         + "\n"
@@ -408,7 +399,111 @@ fn statement_to_string(
     indent: &Indent,
     code_type: &data::CodeType,
 ) -> String {
-    todo!()
+    indent_number_to_string(indent)
+        + &(match statement {
+            data::Statement::EvaluateExpr(expr) => expr_to_string(expr, indent, code_type) + ";",
+            data::Statement::Set(set_statement) => {
+                expr_to_string(&set_statement.target, indent, code_type)
+                    + " "
+                    + &(match &set_statement.operator_maybe {
+                        Some(operator) => binary_operator_to_string(operator),
+                        None => String::from(""),
+                    })
+                    + "= "
+                    + &expr_to_string(&set_statement.expr, indent, code_type)
+                    + ";"
+            }
+            data::Statement::If(if_statement) => {
+                String::from("if (")
+                    + &expr_to_string(&if_statement.condition, indent, code_type)
+                    + ") "
+                    + &statement_list_to_string(
+                        &if_statement.then_statement_list,
+                        indent,
+                        code_type,
+                    )
+            }
+            data::Statement::ThrowError(expr) => {
+                String::from("throw new Error(") + &expr_to_string(expr, indent, code_type) + ");"
+            }
+            data::Statement::Return(expr) => {
+                String::from("return ") + &expr_to_string(expr, indent, code_type) + ";"
+            }
+            data::Statement::ReturnVoid => String::from("return;"),
+            data::Statement::Continue => String::from("continue;"),
+            data::Statement::VariableDefinition(variable_definition_statement) => {
+                String::from(if variable_definition_statement.is_const {
+                    "const"
+                } else {
+                    "let"
+                }) + " "
+                    + &variable_definition_statement.name.get()
+                    + &type_annotation(&variable_definition_statement.r#type, code_type)
+                    + " = "
+                    + &expr_to_string(&variable_definition_statement.expr, indent, code_type)
+                    + ";"
+            }
+            data::Statement::FunctionDefinition(function_definition_statement) => {
+                function_definition_statement_to_string(
+                    function_definition_statement,
+                    indent,
+                    code_type,
+                )
+            }
+
+            data::Statement::For(for_statement) => {
+                String::from("for (let ")
+                    + &for_statement.counter_variable_name.get()
+                    + " = 0; "
+                    + &for_statement.counter_variable_name.get()
+                    + " < "
+                    + &expr_to_string(&for_statement.until_expr, indent, code_type)
+                    + "; "
+                    + &for_statement.counter_variable_name.get()
+                    + " += 1)"
+                    + &statement_list_to_string(&for_statement.statement_list, indent, code_type)
+            }
+            data::Statement::ForOf(for_of_statement) => {
+                String::from("for (const ")
+                    + &for_of_statement.element_variable_name.get()
+                    + " of "
+                    + &expr_to_string(&for_of_statement.iterable_expr, indent, code_type)
+                    + ")"
+                    + &statement_list_to_string(&for_of_statement.statement_list, indent, code_type)
+            }
+            data::Statement::WhileTrue(statement_list) => {
+                String::from("while (true) ")
+                    + &statement_list_to_string(statement_list, indent, code_type)
+            }
+
+            data::Statement::Break => String::from("break"),
+            data::Statement::Switch(switch_statement) => {
+                switch_to_string(switch_statement, indent, code_type)
+            }
+        })
+}
+
+fn binary_operator_to_string(binary_operator: &data::BinaryOperator) -> String {
+    String::from(match binary_operator {
+        data::BinaryOperator::Exponentiation => "**",
+        data::BinaryOperator::Multiplication => "*",
+        data::BinaryOperator::Division => "/",
+        data::BinaryOperator::Remainder => "%",
+        data::BinaryOperator::Addition => "+",
+        data::BinaryOperator::Subtraction => "-",
+        data::BinaryOperator::LeftShift => "<<",
+        data::BinaryOperator::SignedRightShift => ">>",
+        data::BinaryOperator::UnsignedRightShift => ">>>",
+        data::BinaryOperator::LessThan => "<",
+        data::BinaryOperator::LessThanOrEqual => "<=",
+        data::BinaryOperator::Equal => "===",
+        data::BinaryOperator::NotEqual => "!==",
+        data::BinaryOperator::BitwiseAnd => "&",
+        data::BinaryOperator::BitwiseXOr => "^",
+        data::BinaryOperator::BitwiseOr => "|",
+        data::BinaryOperator::LogicalAnd => "&&",
+        data::BinaryOperator::LogicalOr => "||",
+    })
 }
 
 fn indent_number_to_string(indent: &Indent) -> String {
@@ -426,7 +521,20 @@ fn type_annotation(r#type: &data::Type, code_type: &data::CodeType) -> String {
 }
 
 fn type_object_to_string(member_list: &Vec<data::MemberType>) -> String {
-    todo!()
+    String::from("{ ")
+        + &member_list
+            .iter()
+            .map(|member| {
+                document_to_string(&member.document)
+                    + "readonly "
+                    + &property_name_to_string(&member.name)
+                    + &(if member.required { "" } else { "?" })
+                    + ": "
+                    + &type_to_string(&member.r#type)
+            })
+            .collect::<Vec<String>>()
+            .join("; ")
+        + " }"
 }
 
 fn type_function_to_string(function: &data::FunctionType) -> String {
@@ -483,13 +591,10 @@ fn object_literal_to_string(
                 data::Member::KeyValue(data::KeyValue {
                     key,
                     value: data::Expr::Variable(value_identifer),
-                }) if *key == data::identifer::get(value_identifer) => key.clone(),
+                }) if *key == value_identifer.get() => key.clone(),
                 data::Member::KeyValue(data::KeyValue { key, value }) => {
-                    (if data::identifer::is_safe_property_name(key) {
-                        key.clone()
-                    } else {
-                        string_literal_value_to_string(key)
-                    }) + ": "
+                    (property_name_to_string(key))
+                        + ": "
                         + &expr_to_string(value, indent, code_type)
                 }
             })
@@ -534,4 +639,46 @@ fn index_access_to_string(
     code_type: &data::CodeType,
 ) -> String {
     todo!()
+}
+
+fn function_definition_statement_to_string(
+    function_definition: &data::FunctionDefinitionStatement,
+    indent: &Indent,
+    code_type: &data::CodeType,
+) -> String {
+    todo!()
+}
+
+fn switch_to_string(
+    switch: &data::SwitchStatement,
+    indent: &Indent,
+    code_type: &data::CodeType,
+) -> String {
+    let case_indent = indent.add_one();
+    String::from("switch (")
+        + &expr_to_string(&switch.expr, indent, code_type)
+        + ") {\n"
+        + &switch
+            .pattern_list
+            .iter()
+            .map(|pattern| {
+                indent_number_to_string(&case_indent)
+                    + "case "
+                    + &string_literal_value_to_string(&pattern.case_string)
+                    + ": "
+                    + &statement_list_to_string(&pattern.statement_list, &case_indent, code_type)
+            })
+            .collect::<Vec<String>>()
+            .join("\n")
+        + "\n"
+        + &indent_number_to_string(indent)
+        + "}"
+}
+
+fn property_name_to_string(property_name: &str) -> String {
+    if data::identifer::is_safe_property_name(property_name) {
+        String::from(property_name)
+    } else {
+        string_literal_value_to_string(property_name)
+    }
 }

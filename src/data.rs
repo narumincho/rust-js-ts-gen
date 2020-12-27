@@ -378,15 +378,15 @@ pub struct SetStatement {
     /**
      * 対象となる式. 指定の仕方によってはJSのSyntaxErrorになる
      */
-    target: Expr,
+    pub target: Expr,
     /**
      * 演算子を=の左につける
      */
-    operatorMaybe: Option<BinaryOperator>,
+    pub operator_maybe: Option<BinaryOperator>,
     /**
      * 式
      */
-    expr: Expr,
+    pub expr: Expr,
 }
 
 /**
@@ -396,11 +396,11 @@ pub struct IfStatement {
     /**
      * 条件の式
      */
-    condition: Expr,
+    pub condition: Expr,
     /**
      * 条件がtrueのときに実行する文
      */
-    thenStatementList: Vec<Statement>,
+    pub then_statement_list: Vec<Statement>,
 }
 
 /**
@@ -410,19 +410,19 @@ pub struct VariableDefinitionStatement {
     /**
      * 変数名
      */
-    name: identifer::Identifer,
+    pub name: identifer::Identifer,
     /**
      * 変数の型
      */
-    r#type: Type,
+    pub r#type: Type,
     /**
      * 式
      */
-    expr: Expr,
+    pub expr: Expr,
     /**
      * constかどうか. falseはlet
      */
-    isConst: bool,
+    pub is_const: bool,
 }
 
 /**
@@ -432,23 +432,23 @@ pub struct FunctionDefinitionStatement {
     /**
      * 変数名
      */
-    name: identifer::Identifer,
+    pub name: identifer::Identifer,
     /**
      * 型パラメーターのリスト
      */
-    typeParameterList: Vec<identifer::Identifer>,
+    pub type_parameter_list: Vec<identifer::Identifer>,
     /**
      * パラメーターのリスト
      */
-    parameterList: Vec<ParameterWithDocument>,
+    pub parameter_list: Vec<ParameterWithDocument>,
     /**
      * 戻り値の型
      */
-    returnType: Type,
+    pub return_type: Type,
     /**
      * 関数本体
      */
-    statementList: Vec<Statement>,
+    pub statement_list: Vec<Statement>,
 }
 
 /**
@@ -458,15 +458,15 @@ pub struct ForStatement {
     /**
      * カウンタ変数名
      */
-    counterVariableName: identifer::Identifer,
+    pub counter_variable_name: identifer::Identifer,
     /**
      * ループの上限の式
      */
-    untilExpr: Expr,
+    pub until_expr: Expr,
     /**
      * 繰り返す文
      */
-    statementList: Vec<Statement>,
+    pub statement_list: Vec<Statement>,
 }
 
 /**
@@ -476,15 +476,15 @@ pub struct ForOfStatement {
     /**
      * 要素の変数名
      */
-    elementVariableName: identifer::Identifer,
+    pub element_variable_name: identifer::Identifer,
     /**
      * 繰り返す対象
      */
-    iterableExpr: Expr,
+    pub iterable_expr: Expr,
     /**
      * 繰り返す文
      */
-    statementList: Vec<Statement>,
+    pub statement_list: Vec<Statement>,
 }
 
 /**
@@ -494,11 +494,11 @@ pub struct SwitchStatement {
     /**
      * switch(a) {} の a
      */
-    expr: Expr,
+    pub expr: Expr,
     /**
      * case "text": { statementList }
      */
-    patternList: Vec<Pattern>,
+    pub pattern_list: Vec<Pattern>,
 }
 
 /**
@@ -508,11 +508,11 @@ pub struct Pattern {
     /**
      * case に使う文字列
      */
-    caseString: String,
+    pub case_string: String,
     /**
      * statementList
      */
-    statementList: Vec<Statement>,
+    pub statement_list: Vec<Statement>,
 }
 
 /**
@@ -544,11 +544,11 @@ pub struct FunctionType {
     /**
      * 型パラメーターのリスト
      */
-    typeParameterList: Vec<identifer::Identifer>,
+    type_parameter_list: Vec<identifer::Identifer>,
     /**
      * パラメーターの型. 意味のない引数名は適当に付く
      */
-    parameterList: Vec<Type>,
+    parameter_list: Vec<Type>,
     /**
      * 戻り値の型
      */

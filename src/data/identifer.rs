@@ -3,7 +3,20 @@ pub struct Identifer {
     value: String,
 }
 
-/// Identifer の中身の文字を取得する
+impl Identifer {
+    /// Identifer の中身の文字を取得する
+    pub fn get(&self) -> String {
+        self.value.clone()
+    }
+}
+
+impl std::fmt::Display for Identifer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.get())
+    }
+}
+
+#[deprecated]
 pub fn get(identifer: &Identifer) -> String {
     identifer.value.clone()
 }
@@ -47,20 +60,20 @@ fn test_from_string() {
 }
 
 fn to_safe_first_char(char: &char) -> String {
-    if firstSafeCharSet.contains(&char) {
+    if FIRST_SAFE_CHAR_SET.contains(&char) {
         char.to_string()
     } else {
         escape_char(&char)
     }
 }
 
-const firstSafeCharSet: [char; 54] = [
+const FIRST_SAFE_CHAR_SET: [char; 54] = [
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
     't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
     'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '$', '_',
 ];
 
-const safeCharSet: [char; 64] = [
+const SAFE_CHAR_SET: [char; 64] = [
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
     't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
     'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '$', '_', '0', '1', '2',
@@ -68,7 +81,7 @@ const safeCharSet: [char; 64] = [
 ];
 
 fn to_safe_string(char: &char) -> String {
-    if safeCharSet.contains(&char) {
+    if SAFE_CHAR_SET.contains(&char) {
         String::from(*char)
     } else {
         escape_char(&char)
@@ -169,10 +182,10 @@ pub fn is_safe_property_name(word: &str) -> bool {
     match chars.next() {
         None => false,
         Some(first_char) => {
-            if !firstSafeCharSet.contains(&first_char) {
+            if !FIRST_SAFE_CHAR_SET.contains(&first_char) {
                 false
             } else {
-                chars.all(|char| safeCharSet.contains(&char))
+                chars.all(|char| SAFE_CHAR_SET.contains(&char))
             }
         }
     }
