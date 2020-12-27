@@ -301,19 +301,19 @@ pub struct LambdaExpr {
     /**
      * パラメーターのリスト
      */
-    parameterList: Vec<Parameter>,
+    pub parameter_list: Vec<Parameter>,
     /**
      * 型パラメーターのリスト
      */
-    typeParameterList: Vec<identifer::Identifer>,
+    pub type_parameter_list: Vec<identifer::Identifer>,
     /**
      * 戻り値の型
      */
-    returnType: Type,
+    pub return_type: Type,
     /**
      * ラムダ式本体
      */
-    statementList: Vec<Statement>,
+    pub statement_list: Vec<Statement>,
 }
 
 /**
@@ -522,19 +522,19 @@ pub struct MemberType {
     /**
      * プロパティ名
      */
-    name: String,
+    pub name: String,
     /**
      * 必須かどうか falseの場合 ? がつく
      */
-    required: bool,
+    pub required: bool,
     /**
      * 型
      */
-    r#type: Type,
+    pub r#type: Type,
     /**
      * ドキュメント
      */
-    document: String,
+    pub document: String,
 }
 
 /**
@@ -562,11 +562,11 @@ pub struct TypeWithTypeParameter {
     /**
      * パラメーターをつけられる型
      */
-    r#type: Type,
+    pub r#type: Type,
     /**
      * パラメーターに指定する型. なにも要素を入れなけければ T<>ではなく T の形式で出力される
      */
-    typeParameterList: Vec<Type>,
+    pub type_parameter_list: Vec<Type>,
 }
 
 /**
@@ -576,23 +576,19 @@ pub struct IntersectionType {
     /**
      * 左に指定する型
      */
-    left: Type,
+    pub left: Type,
     /**
      * 右に指定する型
      */
-    right: Type,
+    pub right: Type,
 }
 
 /**
  * インポートされた型
  */
 pub struct ImportedType {
-    /**
-     * モジュール名. namedImportされるがその識別子は自動的に作成される
-     */
-    moduleName: String,
-    /**
-     * 型の名前
-     */
-    name: identifer::Identifer,
+    /// モジュール名 `fs` `three` `react` `typescript` `util` など
+    pub module_name: String,
+    /// 型の名前
+    pub name: identifer::Identifer,
 }

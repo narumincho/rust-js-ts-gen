@@ -5,7 +5,7 @@ pub struct Identifer {
 
 /// Identifer の中身の文字を取得する
 pub fn get(identifer: &Identifer) -> String {
-    identifer.value
+    identifer.value.clone()
 }
 
 pub fn from_string(word: String) -> Identifer {
