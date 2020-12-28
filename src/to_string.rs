@@ -22,34 +22,43 @@ const ESLINT_DISABLE_COMMENT: &'static str =
 
 /// コードを文字列にする
 pub fn to_string(code: &data::Code, code_type: &data::CodeType) -> String {
-    String::from(ESLINT_DISABLE_COMMENT)
-        + &(code
-            .export_definition_list
-            .iter()
-            .map(|export_definition| export_definition_to_string(&export_definition, code_type)))
-        .collect::<Vec<String>>()
-        .join("\n")
-        + &(if code.statement_list.is_empty() {
-            String::new()
-        } else {
-            statement_list_to_string(&code.statement_list, &Indent::zero(), code_type)
-        })
+    let mut result = String::new();
+    result.push_str(ESLINT_DISABLE_COMMENT);
+    vec_to_string(
+        &mut result,
+        &code.export_definition_list,
+        |mut r, export_definition| {
+            export_definition_to_string(&mut r, &export_definition, code_type)
+        },
+        "\n",
+    );
+    if code.statement_list.is_empty() {
+        result
+    } else {
+        result.push_str(&statement_list_to_string(
+            &code.statement_list,
+            &Indent::zero(),
+            code_type,
+        ));
+        result
+    }
 }
 
 fn export_definition_to_string(
+    builder: &mut String,
     export_definition: &data::ExportDefinition,
     code_type: &data::CodeType,
-) -> String {
+) {
     match export_definition {
         data::ExportDefinition::TypeAlias(type_alias) => match &code_type {
-            data::CodeType::JavaScript => String::new(),
-            data::CodeType::TypeScript => type_alias_to_string(type_alias),
+            data::CodeType::JavaScript => {}
+            data::CodeType::TypeScript => builder.push_str(&type_alias_to_string(type_alias)),
         },
         data::ExportDefinition::Function(function) => {
-            export_function_to_string(function, code_type)
+            export_function_to_string(builder, function, code_type)
         }
         data::ExportDefinition::Variable(variable) => {
-            export_variable_to_string(variable, code_type)
+            builder.push_str(&export_variable_to_string(variable, code_type))
         }
     }
 }
@@ -67,27 +76,41 @@ fn type_alias_to_string(type_alias: &data::TypeAlias) -> String {
         + ";\n\n"
 }
 
-fn export_function_to_string(function: &data::Function, code_type: &data::CodeType) -> String {
-    document_to_string(
+fn export_function_to_string(
+    builder: &mut String,
+    function: &data::Function,
+    code_type: &data::CodeType,
+) {
+    builder.push_str(&document_to_string(
         &(String::new()
             + &function.document
             + &parameter_list_to_document(&function.parameter_list)),
-    ) + "export const "
-        + &function.name.get()
-        + " = "
-        + &type_parameter_list_to_string(&function.type_parameter_list, code_type)
-        + "("
-        + &function
-            .parameter_list
-            .iter()
-            .map(|parameter| parameter.name.get() + &type_annotation(&parameter.r#type, code_type))
-            .collect::<Vec<String>>()
-            .join(", ")
-        + ")"
-        + &type_annotation(&function.return_type, code_type)
-        + " => "
-        + &lambda_body_to_string(&function.statement_list, &Indent::zero(), code_type)
-        + ";\n\n"
+    ));
+    builder.push_str("export const ");
+    builder.push_str(&function.name.get());
+    builder.push_str(" = ");
+    builder.push_str(&type_parameter_list_to_string(
+        &function.type_parameter_list,
+        code_type,
+    ));
+    builder.push_str("(");
+    vec_to_string(
+        builder,
+        &function.parameter_list,
+        |r, parameter| {
+            r.push_str(&(parameter.name.get() + &type_annotation(&parameter.r#type, code_type)))
+        },
+        ", ",
+    );
+    builder.push_str(")");
+    builder.push_str(&type_annotation(&function.return_type, code_type));
+    builder.push_str(" => ");
+    builder.push_str(&lambda_body_to_string(
+        &function.statement_list,
+        &Indent::zero(),
+        code_type,
+    ));
+    builder.push_str(";\n\n");
 }
 
 fn export_variable_to_string(variable: &data::Variable, code_type: &data::CodeType) -> String {
@@ -832,5 +855,24 @@ fn binary_operator_associativity(binary_operator: &data::BinaryOperator) -> Asso
         | data::BinaryOperator::BitwiseOr
         | data::BinaryOperator::LogicalAnd
         | data::BinaryOperator::LogicalOr => Associativity::LeftToRight,
+    }
+}
+
+fn vec_to_string<E, F>(result: &mut String, vec: &Vec<E>, func: F, separator: &str)
+where
+    F: Fn(&mut String, &E),
+{
+    let mut iter = vec.iter();
+    match iter.next() {
+        Some(item) => {
+            func(result, item);
+        }
+        None => {
+            return;
+        }
+    }
+    for item in iter {
+        result.push_str(separator);
+        func(result, item);
     }
 }
