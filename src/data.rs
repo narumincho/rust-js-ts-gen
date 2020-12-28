@@ -1,6 +1,7 @@
 pub mod identifer;
 
 /// コードの種類
+#[derive(PartialEq, Eq, Debug)]
 pub enum CodeType {
     /// JavaScript. ブラウザで動作するプログラミング言語
     JavaScript,
