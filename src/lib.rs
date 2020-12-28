@@ -18,9 +18,8 @@ fn test_empty() {
   );
 }
 
-#[test]
-fn test_snapshot() {
-  let sample_code: data::Code = data::Code {
+pub fn sample_code() -> data::Code {
+  data::Code {
     export_definition_list: vec![
       data::ExportDefinition::Function(data::Function {
         name: data::identifer::from_string("middleware"),
@@ -108,7 +107,12 @@ fn test_snapshot() {
       }),
       util::console_log(data::Expr::Variable(data::identifer::from_string("sorena"))),
     ],
-  };
+  }
+}
+
+#[test]
+fn test_snapshot() {
+  let sample_code = sample_code();
   let code_as_typescript = to_string::to_string(&sample_code, &data::CodeType::TypeScript);
   let code_as_javascript = to_string::to_string(&sample_code, &data::CodeType::JavaScript);
   println!("TS\n{}", code_as_typescript);
