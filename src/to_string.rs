@@ -64,7 +64,9 @@ fn export_definition_to_string(
 }
 
 fn type_alias_to_string(type_alias: &data::TypeAlias) -> String {
-    document_to_string(&type_alias.document)
+    let mut builder = String::new();
+    document_to_string(&mut builder, &type_alias.document);
+    builder
         + "export type "
         + &type_alias.name.get()
         + &type_parameter_list_to_string(
@@ -81,11 +83,12 @@ fn export_function_to_string(
     function: &data::Function,
     code_type: &data::CodeType,
 ) {
-    builder.push_str(&document_to_string(
+    document_to_string(
+        builder,
         &(String::new()
             + &function.document
             + &parameter_list_to_document(&function.parameter_list)),
-    ));
+    );
     builder.push_str("export const ");
     builder.push_str(&function.name.get());
     builder.push_str(" = ");
@@ -114,7 +117,9 @@ fn export_function_to_string(
 }
 
 fn export_variable_to_string(variable: &data::Variable, code_type: &data::CodeType) -> String {
-    document_to_string(&variable.document)
+    let mut builder = String::new();
+    document_to_string(&mut builder, &variable.document);
+    builder
         + "export const "
         + &variable.name.get()
         + &type_annotation(&variable.r#type, code_type)
@@ -123,25 +128,25 @@ fn export_variable_to_string(variable: &data::Variable, code_type: &data::CodeTy
         + ";\n\n"
 }
 
-fn document_to_string(document: &str) -> String {
+fn document_to_string(builder: &mut String, document: &str) {
     let trimmed = document.trim();
     if trimmed.is_empty() {
-        String::new()
-    } else {
-        String::from("\n/**\n")
-            + &trimmed
-                .lines()
-                .map(|line| {
-                    if line.is_empty() {
-                        String::from(" *")
-                    } else {
-                        String::from(" * ") + line
-                    }
-                })
-                .collect::<Vec<String>>()
-                .join("\n")
-            + "\n */\n"
+        return;
     }
+    builder.push_str("\n/**\n");
+    vec_to_string(
+        builder,
+        &trimmed.lines().collect::<Vec<&str>>(),
+        |builder, line| {
+            builder.push_str(" *");
+            if !line.is_empty() {
+                builder.push(' ');
+                builder.push_str(line)
+            }
+        },
+        "\n",
+    );
+    builder.push_str("\n */\n");
 }
 
 fn parameter_list_to_document(parameter_list: &Vec<data::ParameterWithDocument>) -> String {
@@ -567,7 +572,10 @@ fn type_object_to_string(member_list: &Vec<data::MemberType>) -> String {
         + &member_list
             .iter()
             .map(|member| {
-                document_to_string(&member.document)
+                let mut builder = String::new();
+                document_to_string(&mut builder, &member.document);
+
+                builder
                     + "readonly "
                     + &property_name_to_string(&member.name)
                     + &(if member.required { "" } else { "?" })
