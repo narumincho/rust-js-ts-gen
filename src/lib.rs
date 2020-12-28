@@ -1,5 +1,5 @@
 pub mod data;
-pub mod toString;
+pub mod to_string;
 pub mod util;
 
 #[test]
@@ -8,7 +8,7 @@ fn test_empty() {
     export_definition_list: vec![],
     statement_list: vec![],
   };
-  let code_as_string = toString::to_string(&sample_code, &data::CodeType::JavaScript);
+  let code_as_string = to_string::to_string(&sample_code, &data::CodeType::JavaScript);
   assert_eq!(
     code_as_string,
     r###"/* eslint-disable */
@@ -82,8 +82,8 @@ fn test_function_snapshot() {
     })],
     statement_list: vec![],
   };
-  let code_as_typescript = toString::to_string(&sample_server_code, &data::CodeType::TypeScript);
-  let code_as_javascript = toString::to_string(&sample_server_code, &data::CodeType::JavaScript);
+  let code_as_typescript = to_string::to_string(&sample_server_code, &data::CodeType::TypeScript);
+  let code_as_javascript = to_string::to_string(&sample_server_code, &data::CodeType::JavaScript);
   println!("TS\n{}", code_as_typescript);
   println!("JS\n{}", code_as_javascript);
   assert_eq!(
