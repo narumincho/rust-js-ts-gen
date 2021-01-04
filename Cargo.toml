@@ -1,6 +1,6 @@
 [package]
 name = "rust_js_ts_gen"
-version = "0.0.0"
+version = "0.0.1"
 authors = ["narumincho"]
 edition = "2018"
 
@@ -12,7 +12,16 @@ repository = "https://github.com/narumincho/rust-js-ts-gen"
 criterion = "0.3.3"
 
 [dependencies]
+wasm-bindgen = "0.2.65"
 
 [[bench]]
 name = "my_benchmark"
 harness = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+
+# https://github.com/rustwasm/wasm-pack/issues/886
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-Oz", "--enable-mutable-globals"]
