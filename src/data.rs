@@ -1,7 +1,8 @@
+use serde::{Deserialize, Serialize};
 pub mod identifer;
 
 /// コードの種類
-#[derive(PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub enum CodeType {
     /// JavaScript. ブラウザで動作するプログラミング言語
     JavaScript,
@@ -10,6 +11,7 @@ pub enum CodeType {
 }
 
 /// TypeScriptやJavaScriptのコードを表現する. TypeScriptでも出力できるように型情報をつける必要がある
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Code {
     /// 外部に公開する定義
     pub export_definition_list: Vec<ExportDefinition>,
@@ -18,6 +20,7 @@ pub struct Code {
 }
 
 /// 外部に公開する定義
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub enum ExportDefinition {
     /// 型定義. JavaScript では出力されない
     TypeAlias(TypeAlias),
@@ -31,6 +34,7 @@ pub enum ExportDefinition {
 /// ```ts
 /// export type T = {}
 /// ```
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct TypeAlias {
     pub name: identifer::Identifer,
     pub type_parameter_list: Vec<identifer::Identifer>,
@@ -38,6 +42,7 @@ pub struct TypeAlias {
     pub r#type: Type,
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Function {
     /**
      * 外部に公開する関数の名前
@@ -67,6 +72,7 @@ pub struct Function {
 /**
  * ドキュメント付きの関数のパラメーター. パラメーター名, ドキュメント, 型
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ParameterWithDocument {
     /**
      * パラメーター名
@@ -85,6 +91,7 @@ pub struct ParameterWithDocument {
 /**
  * 関数のパラメーター. パラメーター名, ドキュメント
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Parameter {
     /**
      * パラメーター名
@@ -97,6 +104,7 @@ pub struct Parameter {
 }
 
 /// 変数
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Variable {
     /**
      * 変数の名前
@@ -119,6 +127,7 @@ pub struct Variable {
 /**
  * 単項演算子
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub enum UnaryOperator {
     Minus,
     BitwiseNot,
@@ -128,6 +137,7 @@ pub enum UnaryOperator {
 /**
  * 2項演算子
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub enum BinaryOperator {
     Exponentiation,
     Multiplication,
@@ -152,6 +162,7 @@ pub enum BinaryOperator {
 /**
  * 式
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub enum Expr {
     NumberLiteral(i32),
     StringLiteral(String),
@@ -173,6 +184,7 @@ pub enum Expr {
     TypeAssertion(Box<TypeAssertion>),
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub enum Statement {
     EvaluateExpr(Expr),
     Set(SetStatement),
@@ -193,6 +205,7 @@ pub enum Statement {
 /**
  * 型
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub enum Type {
     Number,
     String,
@@ -214,6 +227,7 @@ pub enum Type {
 /**
  * 単項演算子と適用される式
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct UnaryOperatorExpr {
     /**
      * 単項演算子
@@ -228,6 +242,7 @@ pub struct UnaryOperatorExpr {
 /**
  * 2項演算子と左右の式
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct BinaryOperatorExpr {
     /**
      * 2項演算子
@@ -245,6 +260,7 @@ pub struct BinaryOperatorExpr {
 /**
  * 条件演算子
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ConditionalOperatorExpr {
     /**
      * 条件の式
@@ -262,6 +278,7 @@ pub struct ConditionalOperatorExpr {
 /**
  * 配列リテラルの要素
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ArrayItem {
     /**
      * 式
@@ -275,6 +292,7 @@ pub struct ArrayItem {
 /**
  * オブジェクトリテラルの要素
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub enum Member {
     Spread(Expr),
     KeyValue(KeyValue),
@@ -283,6 +301,7 @@ pub enum Member {
 /**
  * 文字列のkeyと式のvalue
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct KeyValue {
     /**
      * key
@@ -297,6 +316,7 @@ pub struct KeyValue {
 /**
  * ラムダ式
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct LambdaExpr {
     /**
      * パラメーターのリスト
@@ -319,6 +339,7 @@ pub struct LambdaExpr {
 /**
  * インポートした変数
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ImportedVariable {
     /**
      * モジュール名, 使うときにはnamedインポートされ, そのモジュール識別子は自動的につけられる
@@ -332,6 +353,7 @@ pub struct ImportedVariable {
 /**
  * プロパティアクセス
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct GetExpr {
     /**
      * 式
@@ -346,6 +368,7 @@ pub struct GetExpr {
 /**
  * 式と呼ぶパラメーター
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct CallExpr {
     /**
      * 呼ばれる式
@@ -360,6 +383,7 @@ pub struct CallExpr {
 /**
  * 型アサーション
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct TypeAssertion {
     /**
      * 型アサーションを受ける式
@@ -374,6 +398,7 @@ pub struct TypeAssertion {
 /**
  * 代入文
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct SetStatement {
     /**
      * 対象となる式. 指定の仕方によってはJSのSyntaxErrorになる
@@ -392,6 +417,7 @@ pub struct SetStatement {
 /**
  * if文
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct IfStatement {
     /**
      * 条件の式
@@ -406,6 +432,7 @@ pub struct IfStatement {
 /**
  * ローカル変数定義
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct VariableDefinitionStatement {
     /**
      * 変数名
@@ -428,6 +455,7 @@ pub struct VariableDefinitionStatement {
 /**
  * ローカル関数定義
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct FunctionDefinitionStatement {
     /**
      * 変数名
@@ -454,6 +482,7 @@ pub struct FunctionDefinitionStatement {
 /**
  * for文
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ForStatement {
     /**
      * カウンタ変数名
@@ -472,6 +501,7 @@ pub struct ForStatement {
 /**
  * forOf文
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ForOfStatement {
     /**
      * 要素の変数名
@@ -490,6 +520,7 @@ pub struct ForOfStatement {
 /**
  * switch文
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct SwitchStatement {
     /**
      * switch(a) {} の a
@@ -504,6 +535,7 @@ pub struct SwitchStatement {
 /**
  * switch文のcase "text": { statementList } の部分
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Pattern {
     /**
      * case に使う文字列
@@ -518,6 +550,7 @@ pub struct Pattern {
 /**
  * オブジェクトのメンバーの型
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct MemberType {
     /**
      * プロパティ名
@@ -540,6 +573,7 @@ pub struct MemberType {
 /**
  * 関数の型
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct FunctionType {
     /**
      * 型パラメーターのリスト
@@ -558,6 +592,7 @@ pub struct FunctionType {
 /**
  * パラメーター付きの型
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct TypeWithTypeParameter {
     /**
      * パラメーターをつけられる型
@@ -572,6 +607,7 @@ pub struct TypeWithTypeParameter {
 /**
  * 交差型
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct IntersectionType {
     /**
      * 左に指定する型
@@ -586,6 +622,7 @@ pub struct IntersectionType {
 /**
  * インポートされた型
  */
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ImportedType {
     /// モジュール名 `fs` `three` `react` `typescript` `util` など
     pub module_name: String,

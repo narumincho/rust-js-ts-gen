@@ -1,4 +1,5 @@
-#[derive(Debug, Eq, PartialEq)]
+use serde::{Deserialize, Serialize};
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Identifer {
     value: String,
 }
