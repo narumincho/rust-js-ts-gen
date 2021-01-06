@@ -1,3 +1,5 @@
+use std::str::from_utf8;
+
 pub mod data;
 pub mod to_string;
 pub mod util;
@@ -16,11 +18,65 @@ fn test_serde() {
     assert_eq!(code, deserialized_as_bincode.unwrap())
 }
 
+#[test]
+fn gen() {
+    let mut tracer = serde_reflection::Tracer::new(serde_reflection::TracerConfig::default());
+    let samples = serde_reflection::Samples::new();
+    tracer.trace_type::<data::CodeType>(&samples);
+    tracer.trace_type::<data::Code>(&samples);
+    tracer.trace_type::<data::ExportDefinition>(&samples);
+    tracer.trace_type::<data::TypeAlias>(&samples);
+    tracer.trace_type::<data::Function>(&samples);
+    tracer.trace_type::<data::ParameterWithDocument>(&samples);
+    tracer.trace_type::<data::Parameter>(&samples);
+    tracer.trace_type::<data::Variable>(&samples);
+    tracer.trace_type::<data::UnaryOperator>(&samples);
+    tracer.trace_type::<data::BinaryOperator>(&samples);
+    tracer.trace_type::<data::Expr>(&samples);
+    tracer.trace_type::<data::Statement>(&samples);
+    tracer.trace_type::<data::Type>(&samples);
+    tracer.trace_type::<data::UnaryOperatorExpr>(&samples);
+    tracer.trace_type::<data::BinaryOperatorExpr>(&samples);
+    tracer.trace_type::<data::ConditionalOperatorExpr>(&samples);
+    tracer.trace_type::<data::ArrayItem>(&samples);
+    tracer.trace_type::<data::Member>(&samples);
+    tracer.trace_type::<data::KeyValue>(&samples);
+    tracer.trace_type::<data::LambdaExpr>(&samples);
+    tracer.trace_type::<data::ImportedVariable>(&samples);
+    tracer.trace_type::<data::GetExpr>(&samples);
+    tracer.trace_type::<data::CallExpr>(&samples);
+    tracer.trace_type::<data::TypeAssertion>(&samples);
+    tracer.trace_type::<data::SetStatement>(&samples);
+    tracer.trace_type::<data::IfStatement>(&samples);
+    tracer.trace_type::<data::VariableDefinitionStatement>(&samples);
+    tracer.trace_type::<data::FunctionDefinitionStatement>(&samples);
+    tracer.trace_type::<data::ForStatement>(&samples);
+    tracer.trace_type::<data::ForOfStatement>(&samples);
+    tracer.trace_type::<data::SwitchStatement>(&samples);
+    tracer.trace_type::<data::Pattern>(&samples);
+    tracer.trace_type::<data::MemberType>(&samples);
+    tracer.trace_type::<data::FunctionType>(&samples);
+    tracer.trace_type::<data::TypeWithTypeParameter>(&samples);
+    tracer.trace_type::<data::IntersectionType>(&samples);
+    tracer.trace_type::<data::ImportedType>(&samples);
+    tracer.trace_type::<data::identifer::Identifer>(&samples);
+    let registry = tracer.registry().unwrap();
+
+    // Create Python class definitions.
+    let mut source = Vec::new();
+    let config = serde_generate::CodeGeneratorConfig::new("testing".to_string())
+        .with_encodings(vec![serde_generate::Encoding::Bincode]);
+    let generator = serde_generate::typescript::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry);
+    std::fs::write("out.ts", from_utf8(&source).unwrap());
+    ()
+}
+
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn code(name: &str) -> String {
     let sample = data::Code {
         export_definition_list: vec![data::ExportDefinition::Function(data::Function {
-      name: data::identifer::from_string(name),
+            name: data::identifer::from_string(name),
             document: String::from("ミドルウェア"),
             type_parameter_list: vec![],
             parameter_list: vec![
