@@ -1,5 +1,3 @@
-use std::str::from_utf8;
-
 pub mod data;
 pub mod to_string;
 pub mod util;
@@ -22,44 +20,43 @@ fn test_serde() {
 fn gen() {
     let mut tracer = serde_reflection::Tracer::new(serde_reflection::TracerConfig::default());
     let samples = serde_reflection::Samples::new();
-    tracer.trace_type::<data::CodeType>(&samples);
-    tracer.trace_type::<data::Code>(&samples);
-    tracer.trace_type::<data::ExportDefinition>(&samples);
-    tracer.trace_type::<data::TypeAlias>(&samples);
-    tracer.trace_type::<data::Function>(&samples);
-    tracer.trace_type::<data::ParameterWithDocument>(&samples);
-    tracer.trace_type::<data::Parameter>(&samples);
-    tracer.trace_type::<data::Variable>(&samples);
-    tracer.trace_type::<data::UnaryOperator>(&samples);
-    tracer.trace_type::<data::BinaryOperator>(&samples);
-    tracer.trace_type::<data::Expr>(&samples);
-    tracer.trace_type::<data::Statement>(&samples);
-    tracer.trace_type::<data::Type>(&samples);
-    tracer.trace_type::<data::UnaryOperatorExpr>(&samples);
-    tracer.trace_type::<data::BinaryOperatorExpr>(&samples);
-    tracer.trace_type::<data::ConditionalOperatorExpr>(&samples);
-    tracer.trace_type::<data::ArrayItem>(&samples);
-    tracer.trace_type::<data::Member>(&samples);
-    tracer.trace_type::<data::KeyValue>(&samples);
-    tracer.trace_type::<data::LambdaExpr>(&samples);
-    tracer.trace_type::<data::ImportedVariable>(&samples);
-    tracer.trace_type::<data::GetExpr>(&samples);
-    tracer.trace_type::<data::CallExpr>(&samples);
-    tracer.trace_type::<data::TypeAssertion>(&samples);
-    tracer.trace_type::<data::SetStatement>(&samples);
-    tracer.trace_type::<data::IfStatement>(&samples);
-    tracer.trace_type::<data::VariableDefinitionStatement>(&samples);
-    tracer.trace_type::<data::FunctionDefinitionStatement>(&samples);
-    tracer.trace_type::<data::ForStatement>(&samples);
-    tracer.trace_type::<data::ForOfStatement>(&samples);
-    tracer.trace_type::<data::SwitchStatement>(&samples);
-    tracer.trace_type::<data::Pattern>(&samples);
-    tracer.trace_type::<data::MemberType>(&samples);
-    tracer.trace_type::<data::FunctionType>(&samples);
-    tracer.trace_type::<data::TypeWithTypeParameter>(&samples);
-    tracer.trace_type::<data::IntersectionType>(&samples);
-    tracer.trace_type::<data::ImportedType>(&samples);
-    tracer.trace_type::<data::identifer::Identifer>(&samples);
+    let _ = tracer.trace_type::<data::Code>(&samples);
+    let _ = tracer.trace_type::<data::ExportDefinition>(&samples);
+    let _ = tracer.trace_type::<data::TypeAlias>(&samples);
+    let _ = tracer.trace_type::<data::Function>(&samples);
+    let _ = tracer.trace_type::<data::ParameterWithDocument>(&samples);
+    let _ = tracer.trace_type::<data::Parameter>(&samples);
+    let _ = tracer.trace_type::<data::Variable>(&samples);
+    let _ = tracer.trace_type::<data::UnaryOperator>(&samples);
+    let _ = tracer.trace_type::<data::BinaryOperator>(&samples);
+    let _ = tracer.trace_type::<data::Expr>(&samples);
+    let _ = tracer.trace_type::<data::Statement>(&samples);
+    let _ = tracer.trace_type::<data::Type>(&samples);
+    let _ = tracer.trace_type::<data::UnaryOperatorExpr>(&samples);
+    let _ = tracer.trace_type::<data::BinaryOperatorExpr>(&samples);
+    let _ = tracer.trace_type::<data::ConditionalOperatorExpr>(&samples);
+    let _ = tracer.trace_type::<data::ArrayItem>(&samples);
+    let _ = tracer.trace_type::<data::Member>(&samples);
+    let _ = tracer.trace_type::<data::KeyValue>(&samples);
+    let _ = tracer.trace_type::<data::LambdaExpr>(&samples);
+    let _ = tracer.trace_type::<data::ImportedVariable>(&samples);
+    let _ = tracer.trace_type::<data::GetExpr>(&samples);
+    let _ = tracer.trace_type::<data::CallExpr>(&samples);
+    let _ = tracer.trace_type::<data::TypeAssertion>(&samples);
+    let _ = tracer.trace_type::<data::SetStatement>(&samples);
+    let _ = tracer.trace_type::<data::IfStatement>(&samples);
+    let _ = tracer.trace_type::<data::VariableDefinitionStatement>(&samples);
+    let _ = tracer.trace_type::<data::FunctionDefinitionStatement>(&samples);
+    let _ = tracer.trace_type::<data::ForStatement>(&samples);
+    let _ = tracer.trace_type::<data::ForOfStatement>(&samples);
+    let _ = tracer.trace_type::<data::SwitchStatement>(&samples);
+    let _ = tracer.trace_type::<data::Pattern>(&samples);
+    let _ = tracer.trace_type::<data::MemberType>(&samples);
+    let _ = tracer.trace_type::<data::FunctionType>(&samples);
+    let _ = tracer.trace_type::<data::TypeWithTypeParameter>(&samples);
+    let _ = tracer.trace_type::<data::IntersectionType>(&samples);
+    let _ = tracer.trace_type::<data::ImportedType>(&samples);
+    let _ = tracer.trace_type::<data::identifer::Identifer>(&samples);
     let registry = tracer.registry().unwrap();
 
     // Create Python class definitions.
@@ -67,8 +64,8 @@ fn gen() {
     let config = serde_generate::CodeGeneratorConfig::new("testing".to_string())
         .with_encodings(vec![serde_generate::Encoding::Bincode]);
     let generator = serde_generate::typescript::CodeGenerator::new(&config);
-    generator.output(&mut source, &registry);
-    std::fs::write("out.ts", from_utf8(&source).unwrap());
+    let _ = generator.output(&mut source, &registry);
+    let _ = std::fs::write("out.ts", std::str::from_utf8(&source).unwrap());
     ()
 }
 
